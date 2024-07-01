@@ -1,9 +1,9 @@
 use std::env;
+use std::fs::read;
 use std::io::prelude::*;
 use std::net::{TcpListener, TcpStream};
 
 fn handle_client(mut stream: TcpStream) {
-    println!("Handling");
     let mut buffer = [0; 128];
     match stream.read(&mut buffer) {
         Ok(n) => {
@@ -25,22 +25,21 @@ fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
 
     let mode = &args[1];
-    // let file_path = &args[2];
 
     if mode == "server" {
         println!("Running in server mode");
-        let listener = TcpListener::bind("127.0.0.1:50")?;
+        let listener = TcpListener::bind("127.0.0.1:6969")?;
 
         // accept connections and process them serially
         for stream in listener.incoming() {
             handle_client(stream?);
         }
     } else if mode == "client" {
-        println!("Running in client mode");
-        let mut stream = TcpStream::connect("127.0.0.1:50")?;
+        let path = &args[2];
+        let mut stream = TcpStream::connect("127.0.0.1:6969")?;
+        let contents = read(path)?;
 
-        stream.write("hello world".as_bytes())?;
-        // stream.read(&mut [0; 128])?;
+        stream.write(&contents)?;
     }
 
     Ok(())
